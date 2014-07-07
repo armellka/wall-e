@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Wall-e</title>
+
+    <link href="public/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="public/css/main.css" rel="stylesheet"/>
+
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="public/js/jquery.min.js"></script>
+    <script type="text/javascript" src="public/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="public/js/jquery-ui.js"></script>
+    <script type="text/javascript" src="public/js/wall.js"></script>
+
+</head>
+<body>
+<div class="navbar navbar-fixed-top navbar-inverse" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <a class="navbar-brand" href="#">Wall-e</a>
+        </div>
+
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="#"><span id="users"></span> users</a</li>
+            </ul>
+
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+    <a href="#">
+        <button id="btnAdd" class="btn btn-primary">New Note</button>
+    </a>
+
+    <div id="notes"></div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="newModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span
+                            aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Note</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="newNote">
+                        Title: <input type="text" id="title" class="form-control"><br/>
+                        Content: <textarea id="content" class="form-control"></textarea>
+                        Image url: <input type="text" id="url" class="form-control"><br/>
+                        Color: <input id="color" name="color" type="color" value="#E6E6E6">
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" id="btnSave" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

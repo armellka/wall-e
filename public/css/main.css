@@ -1,0 +1,25 @@
+body {
+    padding-top: 60px;
+    background-image: url("data:image/gif;base64,R0lGODlhBgAGAIAAAPr6%2Bv%2F%2F%2FyH5BAAAAAAALAAAAAAGAAYAAAIKTGCJBu2cYFyhAAA7");
+    color: #A0A0A0;
+    font-size: 16px;
+}
+
+.draggable {
+    padding: 0.5em;
+    position: absolute;
+    top: 100px;
+    left: 100px;
+    width: 250px;
+    min-height: 100px;
+    overflow: auto;
+}
+
+.modal-backdrop {
+    background: none;
+}
+
+.title {
+    color: #E97B2D;
+}
+
