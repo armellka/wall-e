@@ -32,11 +32,12 @@ $(document).ready(function () {
             var dataJson = modalToJson();
 
             var note = $(".draggable[pid=" + currentPid + "]");
-            note.find(".title").text(dataJson.title)
-            note.find(".content").text(dataJson.content)
-            note.find(".url").attr("src", dataJson.url)
-            note.css("background-color", dataJson.color);
+            var old = noteToJson(note);
+            dataJson.pid = old.pid;
+            dataJson.left = old.left;
+            dataJson.top = old.top;
 
+            updateNoteFromJson(dataJson);
             updateNoteDb(noteToJson(note));
         }
 
