@@ -37,7 +37,6 @@ $(document).ready(function () {
             note.find(".url").attr("src", dataJson.url)
             note.css("background-color", dataJson.color);
 
-            updateNoteFromJson(dataJson);
             updateNoteDb(noteToJson(note));
         }
 
