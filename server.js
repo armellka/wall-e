@@ -6,6 +6,7 @@ var sio = require('socket.io');
 var express = require('express');
 var morgan = require('morgan');
 var path = require('path');
+var url = require('url');
 var swig = require('swig');
 var bodyParser = require('body-parser');
 var mongo = require('mongodb');
@@ -47,7 +48,7 @@ app.use(function (req, res, next) {
 });
 
 //main page
-app.get('/', function (req, res) {
+app.get('/*', function (req, res) {
     res.render('main.html', { title: 'Express' });
 });
 
@@ -60,7 +61,7 @@ io.sockets.on('connection', function (socket) {
         socket.room = data.wall;
 
         console.log("loadNotes: " + JSON.stringify(data));
-        var collection = db.get(data.wall);
+        var collection = db.get(socket.room);
         collection.find({}, {sort: { pid: 1 }}, function (err, notes) {
             socket.emit('loadNotes', notes);
         });

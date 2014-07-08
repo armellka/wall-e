@@ -24,7 +24,8 @@ function updateNotifCount() {
 $(document).ready(function () {
 
     //buttons event
-    $("#btnAdd").on("click", function () {
+    $("#btnAdd").on("click", function (e) {
+        e.preventDefault();
         currentPid = undefined;
         $("#newModal").modal();
     });
@@ -69,8 +70,16 @@ $(document).ready(function () {
     });
 
     //wall id
-    if (QueryString.wall != undefined)
-        wall = QueryString.wall;
+    var path = window.location.pathname;
+
+    if (path == "/") {
+        var id = ID();
+        window.location.replace("/"+id);
+    }
+    else {
+        wall = path.substr(1, path.length);
+    }
+
 
     //socketio
     socket = io.connect();
@@ -100,15 +109,15 @@ $(document).ready(function () {
         $("#notes").delegate(".draggable", "dblclick", function () {
             editNote($(this));
         });
-        
+
         $("#notes").delegate(".edit-note", "click", function () {
             editNote($(this));
         });
-        
+
         $("#notes").delegate(".draggable", "mouseover", function () {
             $(this).find(".close").show();
         });
-        
+
         $("#notes").delegate(".draggable", "mouseout", function () {
             $(this).find(".close").hide();
         });
@@ -205,43 +214,34 @@ function createNote(data) {
     if (data.url) {
         note.append('<a href="' + data.url + '"><img class="url" src="' + data.url + '" width="100%"/></a>');
     }
-    
+
     $("#notes").append(note);
     $("#notes").find(".close").hide();
     return note;
 }
 
 
-
-//from http://stackoverflow.com/a/979995
-var QueryString = function () {
-    // This function is anonymous, is executed immediately and
-    // the return value is assigned to QueryString!
-    var query_string = {};
-    var query = window.location.search.substring(1);
-    var vars = query.split("&");
-    for (var i = 0; i < vars.length; i++) {
-        var pair = vars[i].split("=");
-        // If first entry with this name
-        if (typeof query_string[pair[0]] === "undefined") {
-            query_string[pair[0]] = pair[1];
-            // If second entry with this name
-        } else if (typeof query_string[pair[0]] === "string") {
-            var arr = [ query_string[pair[0]], pair[1] ];
-            query_string[pair[0]] = arr;
-            // If third or later entry with this name
-        } else {
-            query_string[pair[0]].push(pair[1]);
-        }
-    }
-    return query_string;
-}();
-
 //from http://wowmotty.blogspot.fr/2009/06/convert-jquery-rgb-output-to-hex-color.html
-function rgb2hex(rgb){
- rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
- return "#" +
-  ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
-  ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
-  ("0" + parseInt(rgb[3],10).toString(16)).slice(-2);
+function rgb2hex(rgb) {
+    rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+    return "#" +
+        ("0" + parseInt(rgb[1], 10).toString(16)).slice(-2) +
+        ("0" + parseInt(rgb[2], 10).toString(16)).slice(-2) +
+        ("0" + parseInt(rgb[3], 10).toString(16)).slice(-2);
 }
+
+//from http://stackoverflow.com/a/105074
+function guidGenerator() {
+    var S4 = function () {
+        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+    };
+    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+}
+
+//from https://gist.github.com/gordonbrander/2230317
+var ID = function () {
+    // Math.random should be unique because of its seeding algorithm.
+    // Convert it to base 36 (numbers + letters), and grab the first 9 characters
+    // after the decimal.
+    return '_' + Math.random().toString(36).substr(2, 9);
+};
