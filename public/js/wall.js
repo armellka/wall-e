@@ -1,7 +1,7 @@
 var socket;
 var msg;
 var title = $("title").text();
-var wall = "notecollection";
+var wall = "default";
 var currentPid = undefined;
 var noteCount = 1;
 var notifCount = 0;
@@ -41,16 +41,17 @@ $(document).ready(function () {
             "url": $("#url").val()
         };
 
-
+        //new note
         if (currentPid == undefined) {
             var note = createNote(data);
             saveNote(note);
         }
-        else {
+        else { //update note
             var note = $(".draggable[pid=" + currentPid + "]");
             note.find(".title").text($("#title").val());
             note.find(".content").text($("#content").val());
             note.find(".url").attr("src", $("#url").val());
+            note.css("background-color", $("#color").val());
 
             updateNote(note);
         }
@@ -91,21 +92,26 @@ $(document).ready(function () {
         });
 
         //close
-        $("#notes").delegate(".close-note", "click", function () {
+        $("#notes").delegate(".remove-note", "click", function () {
             deleteNote($(this));
         });
 
         //double click
         $("#notes").delegate(".draggable", "dblclick", function () {
-            currentPid = $(this).attr("pid");
-            var note = $(".draggable[pid=" + currentPid + "]");
-            $("#title").val(note.find(".title").text());
-            $("#content").val(note.find(".content").text());
-            $("#url").val(note.find(".url").attr("src"));
-            $("#newModal").modal();
-
+            editNote($(this));
         });
-
+        
+        $("#notes").delegate(".edit-note", "click", function () {
+            editNote($(this));
+        });
+        
+        $("#notes").delegate(".draggable", "mouseover", function () {
+            $(this).find(".close").show();
+        });
+        
+        $("#notes").delegate(".draggable", "mouseout", function () {
+            $(this).find(".close").hide();
+        });
     });
 
     socket.on('saveNote', function (data) {
@@ -123,6 +129,7 @@ $(document).ready(function () {
         note.find(".title").text(data.title);
         note.find(".content").text(data.content);
         note.find(".url").attr("src", data.url);
+        note.css("background-color", data.color);
     });
 
     socket.on('deleteNote', function (data) {
@@ -136,6 +143,16 @@ $(document).ready(function () {
     });
 });
 
+
+function editNote(elem) {
+    currentPid = elem.attr("pid");
+    var note = $(".draggable[pid=" + currentPid + "]");
+    $("#title").val(note.find(".title").text());
+    $("#content").val(note.find(".content").text());
+    $("#url").val(note.find(".url").attr("src"));
+    $("#color").val(rgb2hex(note.css("background-color")));
+    $("#newModal").modal();
+}
 
 function updateNote(note) {
     var req = {
@@ -176,7 +193,8 @@ function deleteNote(note) {
 
 function createNote(data) {
     var note = jQuery('<div/>', {});
-    note.html('<span class="close close-note" pid=' + data.pid + '>&times;</span>');
+    note.html('<span class="close remove-note" pid=' + data.pid + '><span class="glyphicon glyphicon-remove"></span></span>');
+    note.append('<span class="close edit-note" pid=' + data.pid + '><span class="glyphicon glyphicon-pencil"></span></span>');
     note.attr("class", "draggable")
         .css("background-color", data.color)
         .css("left", data.left)
@@ -187,12 +205,15 @@ function createNote(data) {
     if (data.url) {
         note.append('<a href="' + data.url + '"><img class="url" src="' + data.url + '" width="100%"/></a>');
     }
-
+    
     $("#notes").append(note);
+    $("#notes").find(".close").hide();
     return note;
 }
 
 
+
+//from http://stackoverflow.com/a/979995
 var QueryString = function () {
     // This function is anonymous, is executed immediately and
     // the return value is assigned to QueryString!
@@ -215,3 +236,12 @@ var QueryString = function () {
     }
     return query_string;
 }();
+
+//from http://wowmotty.blogspot.fr/2009/06/convert-jquery-rgb-output-to-hex-color.html
+function rgb2hex(rgb){
+ rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+ return "#" +
+  ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
+  ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
+  ("0" + parseInt(rgb[3],10).toString(16)).slice(-2);
+}

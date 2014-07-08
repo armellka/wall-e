@@ -11,7 +11,6 @@ var bodyParser = require('body-parser');
 var mongo = require('mongodb');
 var monk = require('monk');
 var db = monk('localhost:27017/wall');
-var collectionName = "notecollection";
 
 var APP_PORT = 8081;
 
@@ -60,14 +59,13 @@ io.sockets.on('connection', function (socket) {
         socket.join(data.wall);
         socket.room = data.wall;
 
-        console.log("loadNotes:" + JSON.stringify(data));
+        console.log("loadNotes: " + JSON.stringify(data));
         var collection = db.get(data.wall);
         collection.find({}, {sort: { pid: 1 }}, function (err, notes) {
             socket.emit('loadNotes', notes);
         });
 
         countClients(socket);
-       // console.log(socket)
     });
 
     //save
@@ -80,7 +78,7 @@ io.sockets.on('connection', function (socket) {
 
     //update
     socket.on('updateNote', function (data) {
-        console.log("updateNote:" + JSON.stringify(data));
+        console.log("updateNote: " + JSON.stringify(data));
         var collection = db.get(socket.room);
         collection.update({"pid": data.pid}, {$set: data});
         socket.broadcast.to(socket.room).emit('updateNote', data);
@@ -88,7 +86,7 @@ io.sockets.on('connection', function (socket) {
 
     //delete
     socket.on('deleteNote', function (data) {
-        console.log("deleteNote:" + JSON.stringify(data));
+        console.log("deleteNote: " + JSON.stringify(data));
         var collection = db.get(socket.room);
         collection.remove({"pid": data.pid});
         socket.broadcast.to(socket.room).emit('deleteNote', data)
@@ -96,6 +94,7 @@ io.sockets.on('connection', function (socket) {
 
 
     socket.on('disconnect', function () {
+        console.log("disconnect: " + socket.room);
         countClients(socket);
     });
 

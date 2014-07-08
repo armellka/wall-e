@@ -15,11 +15,17 @@ body {
     overflow: auto;
 }
 
-.modal-backdrop {
-    background: none;
-}
-
 .title {
     color: #E97B2D;
+}
+
+
+.edit-note { 
+    font-size: 14px;
+    margin-right:5px;
+}
+
+.remove-note { 
+    font-size: 14px;
 }
 
