@@ -6,20 +6,6 @@ var currentPid = undefined;
 var noteCount = 1;
 var notifCount = 0;
 
-$(window).focus(function () {
-    notifCount = 0;
-    updateNotifCount();
-});
-
-function updateNotifCount() {
-    if (notifCount == 0) {
-        $("title").text(title);
-    }
-    else {
-        $("title").text(title + " (" + notifCount + ")");
-    }
-}
-
 
 $(document).ready(function () {
 
@@ -32,29 +18,27 @@ $(document).ready(function () {
 
     $("#btnSave").on("click", function () {
         noteCount++;
-        var data = {
-            "pid": noteCount,
-            "left": "100px",
-            "top": "100px",
-            "color": $("#color").val(),
-            "title": $("#title").val(),
-            "content": $("#content").val(),
-            "url": $("#url").val()
-        };
 
         //new note
         if (currentPid == undefined) {
-            var note = createNote(data);
-            saveNote(note);
+            var jsonData = modalToJson();
+            jsonData.pid = noteCount;
+
+            var note = createNoteFromJson(jsonData);
+            saveNoteDb(noteToJson(note));
         }
         else { //update note
-            var note = $(".draggable[pid=" + currentPid + "]");
-            note.find(".title").text($("#title").val());
-            note.find(".content").text($("#content").val());
-            note.find(".url").attr("src", $("#url").val());
-            note.css("background-color", $("#color").val());
 
-            updateNote(note);
+            var dataJson = modalToJson();
+
+            var note = $(".draggable[pid=" + currentPid + "]");
+            note.find(".title").text(dataJson.title)
+            note.find(".content").text(dataJson.content)
+            note.find(".url").attr("src", dataJson.url)
+            note.css("background-color", dataJson.color);
+
+            updateNoteFromJson(dataJson);
+            updateNoteDb(noteToJson(note));
         }
 
         $(".draggable").draggable();
@@ -73,7 +57,7 @@ $(document).ready(function () {
     var path = window.location.pathname;
 
     if (path == "/") {
-        var id = ID();
+        var id = idGenerator();
         window.location.replace("/"+id);
     }
     else {
@@ -89,31 +73,36 @@ $(document).ready(function () {
 
     socket.on('loadNotes', function (notes) {
         for (var note in notes) {
-            createNote(notes[note]);
+            createNoteFromJson(notes[note]);
             noteCount = notes[note].pid;
         }
 
         $(".draggable").draggable();
 
-        //drag
+        //update on drag stop
         $("#notes").delegate(".draggable", "dragstop", function (event, ui) {
-            updateNote($(this));
+            updateNoteDb(noteToJson($(this)));
         });
 
-        //close
+        //remove on button click
         $("#notes").delegate(".remove-note", "click", function () {
-            deleteNote($(this));
+            deleteNoteDb(noteToJson($(this).parent()));
+            $(this).parent().remove();
         });
 
-        //double click
+        //edit on double click
         $("#notes").delegate(".draggable", "dblclick", function () {
-            editNote($(this));
+            currentPid = $(this).attr("pid");
+            jsonToModal(noteToJson($(this).parent()));
         });
 
+        //edit on button click
         $("#notes").delegate(".edit-note", "click", function () {
-            editNote($(this));
+            currentPid = $(this).attr("pid");
+            jsonToModal(noteToJson($(this).parent()));
         });
 
+        //show buttons on mouseover/mouseout
         $("#notes").delegate(".draggable", "mouseover", function () {
             $(this).find(".close").show();
         });
@@ -125,7 +114,7 @@ $(document).ready(function () {
 
     socket.on('saveNote', function (data) {
         console.log("on saveNote " + JSON.stringify(data));
-        createNote(data);
+        createNoteFromJson(data);
         $(".draggable").draggable();
         notifCount++;
         updateNotifCount();
@@ -133,12 +122,7 @@ $(document).ready(function () {
 
     socket.on('updateNote', function (data) {
         console.log("on updateNote " + JSON.stringify(data));
-        var note = $(".draggable[pid=" + data.pid + "]");
-        note.css("top", data.top).css("left", data.left);
-        note.find(".title").text(data.title);
-        note.find(".content").text(data.content);
-        note.find(".url").attr("src", data.url);
-        note.css("background-color", data.color);
+        updateNoteFromJson(data);
     });
 
     socket.on('deleteNote', function (data) {
@@ -152,19 +136,38 @@ $(document).ready(function () {
     });
 });
 
+$(window).focus(function () {
+    notifCount = 0;
+    updateNotifCount();
+});
 
-function editNote(elem) {
-    currentPid = elem.attr("pid");
-    var note = $(".draggable[pid=" + currentPid + "]");
-    $("#title").val(note.find(".title").text());
-    $("#content").val(note.find(".content").text());
-    $("#url").val(note.find(".url").attr("src"));
-    $("#color").val(rgb2hex(note.css("background-color")));
-    $("#newModal").modal();
+function updateNotifCount() {
+    if (notifCount == 0) {
+        $("title").text(title);
+    }
+    else {
+        $("title").text(title + " (" + notifCount + ")");
+    }
 }
 
-function updateNote(note) {
-    var req = {
+function updateNoteDb(jsonData) {
+    console.log("emit updateNote " + JSON.stringify(jsonData));
+    socket.emit("updateNote", jsonData);
+}
+
+function saveNoteDb(jsonData) {
+    console.log("emit saveNote " + JSON.stringify(jsonData));
+    socket.emit("saveNote", jsonData);
+}
+
+function deleteNoteDb(jsonData) {
+    console.log("emit deleteNote " + JSON.stringify(jsonData));
+    socket.emit("deleteNote", jsonData);
+}
+
+
+function noteToJson(note) {
+    var dataJson = {
         "pid": note.attr("pid"),
         "left": note.css("left"),
         "top": note.css("top"),
@@ -173,51 +176,58 @@ function updateNote(note) {
         "url": note.find(".url").attr("src"),
         "color": note.css("background-color")
     };
-    console.log("emit updateNote " + JSON.stringify(req));
-    socket.emit("updateNote", req);
+    return dataJson;
 }
 
-function saveNote(note) {
-    var req = {
-        "pid": note.attr("pid"),
-        "left": note.css("left"),
-        "top": note.css("top"),
-        "title": note.find(".title").text(),
-        "content": note.find(".content").text(),
-        "url": note.find(".url").attr("src"),
-        "color": note.css("background-color")
-    };
-    console.log("emit saveNote " + JSON.stringify(req));
-    socket.emit("saveNote", req);
-}
+function createNoteFromJson(dataJson) {
+    var note = jQuery('<div/>');
+    note.html('<span class="close remove-note" pid=' + dataJson.pid + '><span class="glyphicon glyphicon-remove"></span></span>')
+        .append('<span class="close edit-note" pid=' + dataJson.pid + '><span class="glyphicon glyphicon-pencil"></span></span>')
+        .attr("class", "draggable")
+        .css("background-color", dataJson.color)
+        .css("left", dataJson.left)
+        .css("top", dataJson.top)
+        .attr("pid", dataJson.pid)
+        .append('<p class="title">' + dataJson.title + '</p>')
+        .append('<p class="content">' + dataJson.content + '</p>');
 
-function deleteNote(note) {
-    var req = {
-        "pid": note.attr("pid")
-    };
-    console.log("emit deleteNote " + JSON.stringify(req));
-    socket.emit("deleteNote", req);
-    note.parent().remove();
-}
-
-function createNote(data) {
-    var note = jQuery('<div/>', {});
-    note.html('<span class="close remove-note" pid=' + data.pid + '><span class="glyphicon glyphicon-remove"></span></span>');
-    note.append('<span class="close edit-note" pid=' + data.pid + '><span class="glyphicon glyphicon-pencil"></span></span>');
-    note.attr("class", "draggable")
-        .css("background-color", data.color)
-        .css("left", data.left)
-        .css("top", data.top)
-        .attr("pid", data.pid)
-        .append('<p class="title">' + data.title + '</p>')
-        .append('<p class="content">' + data.content + '</p>');
-    if (data.url) {
-        note.append('<a href="' + data.url + '"><img class="url" src="' + data.url + '" width="100%"/></a>');
+    if (dataJson.url) {
+        note.append('<a href="' + dataJson.url + '"><img class="url" src="' + dataJson.url + '" width="100%"/></a>');
     }
 
     $("#notes").append(note);
     $("#notes").find(".close").hide();
     return note;
+}
+
+function updateNoteFromJson(dataJson) {
+
+    var note = $(".draggable[pid=" + dataJson.pid + "]");
+
+    note.css("top", dataJson.top)
+    note.css("left", dataJson.left)
+    note.find(".title").text(dataJson.title)
+    note.find(".content").text(dataJson.content)
+    note.find(".url").attr("src", dataJson.url)
+    note.css("background-color", dataJson.color);
+}
+
+function jsonToModal(dataJson) {
+    $("#title").val(dataJson.title);
+    $("#content").val(dataJson.content);
+    $("#url").val(dataJson.url);
+    $("#color").val(rgb2hex(dataJson.color));
+    $("#newModal").modal();
+}
+
+function modalToJson() {
+    var dataJson = {
+        "color": $("#color").val(),
+        "title": $("#title").val(),
+        "content": $("#content").val(),
+        "url": $("#url").val()
+    };
+    return dataJson;
 }
 
 
@@ -239,7 +249,7 @@ function guidGenerator() {
 }
 
 //from https://gist.github.com/gordonbrander/2230317
-var ID = function () {
+var idGenerator = function () {
     // Math.random should be unique because of its seeding algorithm.
     // Convert it to base 36 (numbers + letters), and grab the first 9 characters
     // after the decimal.
