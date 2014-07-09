@@ -93,7 +93,7 @@ $(document).ready(function () {
         //edit on double click
         $("#notes").delegate(".draggable", "dblclick", function () {
             currentPid = $(this).attr("pid");
-            jsonToModal(noteToJson($(this).parent()));
+            jsonToModal(noteToJson($(this)));
         });
 
         //edit on button click
