@@ -10,11 +10,12 @@
 
     <link href="public/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="public/css/main.css" rel="stylesheet"/>
+    <link type="image/png" href="public/img/logo.png" rel="icon"  />
 
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="public/js/jquery.min.js"></script>
     <script type="text/javascript" src="public/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="public/js/jquery-ui.js"></script>
+    <script type="text/javascript" src="public/js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="public/js/wall.js"></script>
 
 </head>
@@ -56,19 +57,20 @@
                             aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                     <h4 class="modal-title" id="myModalLabel">Note</h4>
                 </div>
-                <div class="modal-body">
-                    <form id="newNote">
-                        Title: <input type="text" id="title" class="form-control"><br/>
-                        Content: <textarea id="content" class="form-control"></textarea>
-                        Image url: <input type="text" id="url" class="form-control"><br/>
-                        Color: <input id="color" name="color" type="color" value="#E6E6E6">
-                    </form>
+                <form id="newNote">
+                    <div class="modal-body">
+                            Title: <input type="text" id="title" class="form-control"><br/>
+                            Content: <textarea id="content" class="form-control"></textarea>
+                            Image url: <input type="text" id="url" class="form-control"><br/>
+                            Color: <input id="color" name="color" type="color" value="#E6E6E6">
+                        
 
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" id="btnSave" class="btn btn-primary">Save</button>
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" id="btnSave" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

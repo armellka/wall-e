@@ -5,16 +5,6 @@ body {
     font-size: 16px;
 }
 
-.draggable {
-    padding: 0.5em;
-    position: absolute;
-    top: 100px;
-    left: 100px;
-    width: 250px;
-    min-height: 100px;
-    overflow: auto;
-}
-
 .title {
     color: #E97B2D;
 }
@@ -28,4 +18,47 @@ body {
 .remove-note { 
     font-size: 14px;
 }
+
+.draggable {
+    padding: 0.5em;
+    position: absolute;
+    top: 100px;
+    left: 100px;
+    width: 250px;
+    min-height: 100px;
+    
+}
+
+.ui-resizable {
+
+}
+.ui-resizable-handle {
+    position: absolute;
+    font-size: 0.1px;
+    display: block;
+    -ms-touch-action: none;
+    touch-action: none;
+}
+.ui-resizable-disabled .ui-resizable-handle,
+.ui-resizable-autohide .ui-resizable-handle {
+display: none;
+}
+
+.ui-resizable-se {
+    cursor: se-resize;
+    width: 12px;
+    height: 12px;
+    right: 1px;
+    bottom: 1px;
+}
+.ui-resizable-sw {
+    cursor: sw-resize;
+    width: 9px;
+    height: 9px;
+    left: -5px;
+    bottom: -5px;
+}
+
+
+
 

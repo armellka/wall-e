@@ -16,7 +16,8 @@ $(document).ready(function () {
         $("#newModal").modal();
     });
 
-    $("#btnSave").on("click", function () {
+    $("#newNote").bind("submit", function (e) {
+        e.preventDefault();
         noteCount++;
 
         //new note
@@ -42,6 +43,7 @@ $(document).ready(function () {
         }
 
         $(".draggable").draggable();
+        $(".draggable").resizable();
         $("#newModal").modal('hide');
 
     });
@@ -78,6 +80,7 @@ $(document).ready(function () {
         }
 
         $(".draggable").draggable();
+        $(".draggable").resizable();
 
         //update on drag stop
         $("#notes").delegate(".draggable", "dragstop", function (event, ui) {
@@ -110,12 +113,18 @@ $(document).ready(function () {
         $("#notes").delegate(".draggable", "mouseout", function () {
             $(this).find(".close").hide();
         });
+        
+        //resize
+        $("#notes").delegate(".draggable","resizestop", function (event, ui) {
+            updateNoteDb(noteToJson($(this)));
+        });
     });
 
     socket.on('saveNote', function (data) {
         console.log("on saveNote " + JSON.stringify(data));
         createNoteFromJson(data);
         $(".draggable").draggable();
+        $(".draggable").resizable();
         notifCount++;
         updateNotifCount();
     });
@@ -171,6 +180,8 @@ function noteToJson(note) {
         "pid": note.attr("pid"),
         "left": note.css("left"),
         "top": note.css("top"),
+        "width": note.css("width"),
+        "height": note.css("height"),
         "title": note.find(".title").text(),
         "content": note.find(".content").text(),
         "url": note.find(".url").attr("src"),
@@ -187,6 +198,8 @@ function createNoteFromJson(dataJson) {
         .css("background-color", dataJson.color)
         .css("left", dataJson.left)
         .css("top", dataJson.top)
+        .css("width", dataJson.width)
+        .css("height", dataJson.height)
         .attr("pid", dataJson.pid)
         .append('<p class="title">' + dataJson.title + '</p>')
         .append('<p class="content">' + dataJson.content + '</p>');
@@ -206,6 +219,8 @@ function updateNoteFromJson(dataJson) {
 
     note.css("top", dataJson.top)
     note.css("left", dataJson.left)
+    note.css("width", dataJson.width)
+    note.css("height", dataJson.height)
     note.find(".title").text(dataJson.title)
     note.find(".content").text(dataJson.content)
     note.find(".url").attr("src", dataJson.url)
