@@ -64,7 +64,7 @@ $(document).ready(function () {
     var path = window.location.pathname;
 
     if (path == "/") {
-        var id =  Math.random().toString(36).substr(2, 20);
+        var id =  "w" + Math.random().toString(36).substr(2, 15);
         window.location.replace("/"+id);
     }
     else {
@@ -265,4 +265,3 @@ function rgb2hex(rgb) {
         ("0" + parseInt(rgb[2], 10).toString(16)).slice(-2) +
         ("0" + parseInt(rgb[3], 10).toString(16)).slice(-2);
 }
-
