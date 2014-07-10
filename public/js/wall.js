@@ -9,9 +9,7 @@ var notifCount = 0;
 
 $(document).ready(function () {
 
-    $("#newModal").draggable({
-        handle: ".modal-header"
-    });
+    $("#newModal").draggable({handle: ".modal-header"});
 
     //buttons event
     $("#btnAdd").on("click", function (e) {
@@ -47,7 +45,7 @@ $(document).ready(function () {
             updateNoteDb(noteToJson(note));
         }
 
-        $(".draggable").draggable();
+        $(".draggable").draggable({handle: ".move-note"});
         $(".draggable").resizable();
         $("#newModal").modal('hide');
 
@@ -86,7 +84,7 @@ $(document).ready(function () {
             noteCount = notes[note].pid;
         }
 
-        $(".draggable").draggable();
+        $(".draggable").draggable({handle: ".move-note"});
         $(".draggable").resizable();
 
         //update on drag stop
@@ -130,7 +128,7 @@ $(document).ready(function () {
     socket.on('saveNote', function (data) {
         console.log("on saveNote " + JSON.stringify(data));
         createNoteFromJson(data);
-        $(".draggable").draggable();
+        $(".draggable").draggable({handle: ".move-note"});
         $(".draggable").resizable();
         notifCount++;
         updateNotifCount();
@@ -202,6 +200,7 @@ function createNoteFromJson(dataJson) {
     var note = jQuery('<div/>');
     note.html('<span class="close remove-note" pid=' + dataJson.pid + '><span class="glyphicon glyphicon-remove"></span></span>')
         .append('<span class="close edit-note" pid=' + dataJson.pid + '><span class="glyphicon glyphicon-pencil"></span></span>')
+        .append('<span class="close move-note" pid=' + dataJson.pid + '><span class="glyphicon glyphicon-move"></span></span>')
         .attr("class", "draggable")
         .attr("pid", dataJson.pid)
         .css("background-color", dataJson.color)
