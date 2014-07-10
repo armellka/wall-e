@@ -9,6 +9,10 @@ var notifCount = 0;
 
 $(document).ready(function () {
 
+    $("#newModal").draggable({
+        handle: ".modal-header"
+    });
+
     //buttons event
     $("#btnAdd").on("click", function (e) {
         e.preventDefault();
@@ -24,7 +28,7 @@ $(document).ready(function () {
         if (currentPid == undefined) {
             var jsonData = modalToJson();
             jsonData.pid = noteCount;
-
+            jsonData.date = new Date().getTime()/1000;
             var note = createNoteFromJson(jsonData);
             saveNoteDb(noteToJson(note));
         }
@@ -37,6 +41,7 @@ $(document).ready(function () {
             dataJson.pid = old.pid;
             dataJson.left = old.left;
             dataJson.top = old.top;
+            dataJson.date = new Date().getTime()/1000;
 
             updateNoteFromJson(dataJson);
             updateNoteDb(noteToJson(note));
@@ -53,6 +58,8 @@ $(document).ready(function () {
     $('#newModal').on('hidden.bs.modal', function () {
         currentPid = undefined;
         $("#newNote")[0].reset();
+        $("#newModal").css("left",0);
+        $("#newModal").css("top",0);
     });
 
     //wall id
@@ -182,10 +189,11 @@ function noteToJson(note) {
         "top": note.css("top"),
         "width": note.css("width"),
         "height": note.css("height"),
+        "color": note.css("background-color"),
         "title": note.find(".title").text(),
         "content": note.find(".content").text(),
         "url": note.find(".url").attr("src"),
-        "color": note.css("background-color")
+        "date":  note.find(".date").attr("data-unix")
     };
     return dataJson;
 }
@@ -195,18 +203,20 @@ function createNoteFromJson(dataJson) {
     note.html('<span class="close remove-note" pid=' + dataJson.pid + '><span class="glyphicon glyphicon-remove"></span></span>')
         .append('<span class="close edit-note" pid=' + dataJson.pid + '><span class="glyphicon glyphicon-pencil"></span></span>')
         .attr("class", "draggable")
+        .attr("pid", dataJson.pid)
         .css("background-color", dataJson.color)
         .css("left", dataJson.left)
         .css("top", dataJson.top)
         .css("width", dataJson.width)
         .css("height", dataJson.height)
-        .attr("pid", dataJson.pid)
         .append('<p class="title">' + dataJson.title + '</p>')
-        .append('<p class="content">' + dataJson.content + '</p>');
-
+        .append('<p class="content">' + dataJson.content + '</p>')
+        
     if (dataJson.url) {
         note.append('<a href="' + dataJson.url + '"><img class="url" src="' + dataJson.url + '" width="100%"/></a>');
     }
+    
+    note.append('<p class="date" data-unix="' + dataJson.date + '">' + moment.unix(dataJson.date).format('MMMM Do YYYY, h:mm:ss a') + '</p>');
 
     $("#notes").append(note);
     $("#notes").find(".close").hide();
@@ -221,10 +231,12 @@ function updateNoteFromJson(dataJson) {
     note.css("left", dataJson.left)
     note.css("width", dataJson.width)
     note.css("height", dataJson.height)
+    note.css("background-color", dataJson.color)
     note.find(".title").text(dataJson.title)
     note.find(".content").text(dataJson.content)
     note.find(".url").attr("src", dataJson.url)
-    note.css("background-color", dataJson.color);
+    note.find(".date").attr("data-unix", dataJson.date);
+    note.find(".date").text(moment.unix(dataJson.date).format('MMMM Do YYYY, h:mm:ss a'));
 }
 
 function jsonToModal(dataJson) {

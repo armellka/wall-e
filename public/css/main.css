@@ -9,6 +9,10 @@ body {
     color: #E97B2D;
 }
 
+.date {
+    font-size: 70%;
+    text-align:right;
+}
 
 .edit-note { 
     font-size: 14px;
@@ -17,6 +21,10 @@ body {
 
 .remove-note { 
     font-size: 14px;
+}
+
+.modal-backdrop {
+    background: none;
 }
 
 .draggable {
