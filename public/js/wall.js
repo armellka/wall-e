@@ -64,7 +64,7 @@ $(document).ready(function () {
     var path = window.location.pathname;
 
     if (path == "/") {
-        var id = idGenerator();
+        var id =  Math.random().toString(36).substr(2, 20);
         window.location.replace("/"+id);
     }
     else {
@@ -266,18 +266,3 @@ function rgb2hex(rgb) {
         ("0" + parseInt(rgb[3], 10).toString(16)).slice(-2);
 }
 
-//from http://stackoverflow.com/a/105074
-function guidGenerator() {
-    var S4 = function () {
-        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-    };
-    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
-}
-
-//from https://gist.github.com/gordonbrander/2230317
-var idGenerator = function () {
-    // Math.random should be unique because of its seeding algorithm.
-    // Convert it to base 36 (numbers + letters), and grab the first 9 characters
-    // after the decimal.
-    return '_' + Math.random().toString(36).substr(2, 9);
-};
