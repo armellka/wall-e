@@ -20,10 +20,10 @@ $(document).ready(function () {
 
     $("#newNote").bind("submit", function (e) {
         e.preventDefault();
-        noteCount++;
-
+        
         //new note
         if (currentPid == undefined) {
+            noteCount++;
             var jsonData = modalToJson();
             jsonData.pid = noteCount;
             jsonData.date = new Date().getTime()/1000;
@@ -130,6 +130,7 @@ $(document).ready(function () {
         createNoteFromJson(data);
         $(".draggable").draggable({handle: ".move-note"});
         $(".draggable").resizable();
+        noteCount = data.pid;
         notifCount++;
         updateNotifCount();
     });
@@ -265,3 +266,4 @@ function rgb2hex(rgb) {
         ("0" + parseInt(rgb[2], 10).toString(16)).slice(-2) +
         ("0" + parseInt(rgb[3], 10).toString(16)).slice(-2);
 }
+
