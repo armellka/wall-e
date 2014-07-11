@@ -3,15 +3,28 @@ body {
     background-image: url("data:image/gif;base64,R0lGODlhBgAGAIAAAPr6%2Bv%2F%2F%2FyH5BAAAAAAALAAAAAAGAAYAAAIKTGCJBu2cYFyhAAA7");
     color: #A0A0A0;
     font-size: 16px;
+    color: #414141;
 }
 
 .title {
-    color: #E97B2D;
+    font-weight: bold;
+}
+
+.light-color {
+    color: #ffffff;
+}
+
+.light-shadow {
+    text-shadow: 0 1px 0 #000;
 }
 
 .date {
     font-size: 70%;
     text-align:right;
+}
+
+.close {
+    opacity: 0.5;
 }
 
 .edit-note { 

@@ -45,8 +45,6 @@ $(document).ready(function () {
             updateNoteDb(noteToJson(note));
         }
 
-        $(".draggable").draggable({handle: ".move-note"});
-        $(".draggable").resizable();
         $("#newModal").modal('hide');
 
     });
@@ -83,9 +81,6 @@ $(document).ready(function () {
             createNoteFromJson(notes[note]);
             noteCount = notes[note].pid;
         }
-
-        $(".draggable").draggable({handle: ".move-note"});
-        $(".draggable").resizable();
 
         //update on drag stop
         $("#notes").delegate(".draggable", "dragstop", function (event, ui) {
@@ -128,8 +123,6 @@ $(document).ready(function () {
     socket.on('saveNote', function (data) {
         console.log("on saveNote " + JSON.stringify(data));
         createNoteFromJson(data);
-        $(".draggable").draggable({handle: ".move-note"});
-        $(".draggable").resizable();
         noteCount = data.pid;
         notifCount++;
         updateNotifCount();
@@ -220,6 +213,12 @@ function createNoteFromJson(dataJson) {
 
     $("#notes").append(note);
     $("#notes").find(".close").hide();
+    
+    note.contrastColor();
+    
+    note.draggable({handle: ".move-note"});
+    note.resizable();
+    
     return note;
 }
 
@@ -237,6 +236,7 @@ function updateNoteFromJson(dataJson) {
     note.find(".url").attr("src", dataJson.url)
     note.find(".date").attr("data-unix", dataJson.date);
     note.find(".date").text(moment.unix(dataJson.date).format('MMMM Do YYYY, h:mm:ss a'));
+    $('.draggable').contrastColor();
 }
 
 function jsonToModal(dataJson) {
@@ -257,7 +257,6 @@ function modalToJson() {
     return dataJson;
 }
 
-
 //from http://wowmotty.blogspot.fr/2009/06/convert-jquery-rgb-output-to-hex-color.html
 function rgb2hex(rgb) {
     rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
@@ -267,3 +266,33 @@ function rgb2hex(rgb) {
         ("0" + parseInt(rgb[3], 10).toString(16)).slice(-2);
 }
 
+//from http://codeitdown.com/jquery-color-contrast/
+$.fn.contrastColor = function() {
+    return this.each(function() {
+        var bg = $(this).css('background-color');
+        //use first opaque parent bg if element is transparent
+        if(bg == 'transparent' || bg == 'rgba(0, 0, 0, 0)') { 
+            $(this).parents().each(function(){
+                bg = $(this).css('background-color')
+                if(bg != 'transparent' && bg != 'rgba(0, 0, 0, 0)') return false; 
+            });
+            //exit if all parents are transparent
+            if(bg == 'transparent' || bg == 'rgba(0, 0, 0, 0)') return false;
+        }
+        //get r,g,b and decide
+        var rgb = bg.replace(/^(rgb|rgba)\(/,'').replace(/\)$/,'').replace(/\s/g,'').split(',');
+        var yiq = ((rgb[0]*299)+(rgb[1]*587)+(rgb[2]*114))/1000;
+        if(yiq >= 128) {
+            $(this).find(".title").removeClass('light-color ');
+            $(this).find(".content").removeClass('light-color');
+            $(this).find(".date").removeClass('light-color');
+            $(this).find(".close").removeClass('light-color light-shadow');
+        }
+        else {
+            $(this).find(".title").addClass('light-color');
+            $(this).find(".content").addClass('light-color');
+            $(this).find(".date").addClass('light-color');
+            $(this).find(".close").addClass('light-color light-shadow');
+        }
+    });
+};
