@@ -9,14 +9,25 @@ var notifCount = 0;
 
 $(document).ready(function () {
 
-    $("#newModal").draggable({handle: ".modal-header"});
+    $("#newModal").draggable({handle: ".modal-header", opacity:0.8});
 
     //buttons event
     $("#btnAdd").on("click", function (e) {
         e.preventDefault();
+        resetModal();
         currentPid = undefined;
         $("#newModal").modal();
     });
+
+    $("#content").summernote({
+  toolbar: [
+    ['style', ['bold', 'italic', 'underline', 'clear']],
+    ['font', ['strikethrough']],
+    ['fontsize', ['fontsize']],
+    ['color', ['color']],
+    ['insert', ['link', 'picture']]
+  ]
+});
 
     $("#newNote").bind("submit", function (e) {
         e.preventDefault();
@@ -49,14 +60,6 @@ $(document).ready(function () {
 
     });
 
-
-    //modal hide, reset
-    $('#newModal').on('hidden.bs.modal', function () {
-        currentPid = undefined;
-        $("#newNote")[0].reset();
-        $("#newModal").css("left",0);
-        $("#newModal").css("top",0);
-    });
 
     //wall id
     var path = window.location.pathname;
@@ -183,8 +186,7 @@ function noteToJson(note) {
         "height": note.css("height"),
         "color": note.css("background-color"),
         "title": note.find(".title").text(),
-        "content": note.find(".content").text(),
-        "url": note.find(".url").attr("src"),
+        "content": note.find(".content").html(),
         "date":  note.find(".date").attr("data-unix")
     };
     return dataJson;
@@ -192,6 +194,7 @@ function noteToJson(note) {
 
 function createNoteFromJson(dataJson) {
     var note = jQuery('<div/>');
+
     note.html('<span class="close remove-note" pid=' + dataJson.pid + '><span class="glyphicon glyphicon-remove"></span></span>')
         .append('<span class="close edit-note" pid=' + dataJson.pid + '><span class="glyphicon glyphicon-pencil"></span></span>')
         .append('<span class="close move-note" pid=' + dataJson.pid + '><span class="glyphicon glyphicon-move"></span></span>')
@@ -202,21 +205,24 @@ function createNoteFromJson(dataJson) {
         .css("top", dataJson.top)
         .css("width", dataJson.width)
         .css("height", dataJson.height)
-        .append('<p class="title">' + dataJson.title + '</p>')
-        .append('<p class="content">' + dataJson.content + '</p>')
-        
-    if (dataJson.url) {
-        note.append('<a href="' + dataJson.url + '"><img class="url" src="' + dataJson.url + '" width="100%"/></a>');
-    }
-    
-    note.append('<p class="date" data-unix="' + dataJson.date + '">' + moment.unix(dataJson.date).format('MMMM Do YYYY, h:mm:ss a') + '</p>');
+        .append('<p class="title"></p>')
+        .append('<p class="content"></p>')
+        .append('<p class="date" data-unix="' + dataJson.date + '">' + moment.unix(dataJson.date).format('MMMM Do YYYY, h:mm:ss a') + '</p>');
 
+    //set data
+    note.find(".title").text(dataJson.title);
+    $("#content").code(dataJson.content); //remove javascript
+    note.find(".content").html($("#content").code());
+
+    //add note
     $("#notes").append(note);
     $("#notes").find(".close").hide();
     
+    //compute color contrast
     note.contrastColor();
     
-    note.draggable({handle: ".move-note"});
+    //attach events
+    note.draggable({handle: ".move-note", opacity:0.8});
     note.resizable();
     
     return note;
@@ -232,8 +238,8 @@ function updateNoteFromJson(dataJson) {
     note.css("height", dataJson.height)
     note.css("background-color", dataJson.color)
     note.find(".title").text(dataJson.title)
-    note.find(".content").text(dataJson.content)
-    note.find(".url").attr("src", dataJson.url)
+    $("#content").code(dataJson.content); //remove javascript
+    note.find(".content").html($("#content").code());
     note.find(".date").attr("data-unix", dataJson.date);
     note.find(".date").text(moment.unix(dataJson.date).format('MMMM Do YYYY, h:mm:ss a'));
     $('.draggable').contrastColor();
@@ -241,8 +247,7 @@ function updateNoteFromJson(dataJson) {
 
 function jsonToModal(dataJson) {
     $("#title").val(dataJson.title);
-    $("#content").val(dataJson.content);
-    $("#url").val(dataJson.url);
+    $("#content").code(dataJson.content);
     $("#color").val(rgb2hex(dataJson.color));
     $("#newModal").modal();
 }
@@ -251,10 +256,17 @@ function modalToJson() {
     var dataJson = {
         "color": $("#color").val(),
         "title": $("#title").val(),
-        "content": $("#content").val(),
-        "url": $("#url").val()
+        "content": $("#content").code(),
     };
     return dataJson;
+}
+
+function resetModal() {
+        //currentPid = undefined;
+        $("#newNote")[0].reset();
+        $("#newModal").css("left", 0);
+        $("#newModal").css("top", 0);
+        $("#content").code("");
 }
 
 //from http://wowmotty.blogspot.fr/2009/06/convert-jquery-rgb-output-to-hex-color.html
