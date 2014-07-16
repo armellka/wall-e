@@ -9,7 +9,7 @@ var notifCount = 0;
 
 $(document).ready(function () {
 
-    $("#newModal").draggable({handle: ".modal-header", opacity:0.8});
+    $("#newModal").draggable({handle: ".modal-header", opacity: 0.8});
 
     //buttons event
     $("#btnAdd").on("click", function (e) {
@@ -20,24 +20,24 @@ $(document).ready(function () {
     });
 
     $("#content").summernote({
-  toolbar: [
-    ['style', ['bold', 'italic', 'underline', 'clear']],
-    ['font', ['strikethrough']],
-    ['fontsize', ['fontsize']],
-    ['color', ['color']],
-    ['insert', ['link', 'picture']]
-  ]
-});
+        toolbar: [
+            ['style', ['bold', 'italic', 'underline', 'clear']],
+            ['font', ['strikethrough']],
+            ['fontsize', ['fontsize']],
+            ['color', ['color']],
+            ['insert', ['link', 'picture']]
+        ]
+    });
 
     $("#newNote").bind("submit", function (e) {
         e.preventDefault();
-        
+
         //new note
         if (currentPid == undefined) {
             noteCount++;
             var jsonData = modalToJson();
             jsonData.pid = noteCount;
-            jsonData.date = new Date().getTime()/1000;
+            jsonData.date = new Date().getTime() / 1000;
             var note = createNoteFromJson(jsonData);
             saveNoteDb(noteToJson(note));
         }
@@ -50,7 +50,7 @@ $(document).ready(function () {
             dataJson.pid = old.pid;
             dataJson.left = old.left;
             dataJson.top = old.top;
-            dataJson.date = new Date().getTime()/1000;
+            dataJson.date = new Date().getTime() / 1000;
 
             updateNoteFromJson(dataJson);
             updateNoteDb(noteToJson(note));
@@ -65,8 +65,8 @@ $(document).ready(function () {
     var path = window.location.pathname;
 
     if (path == "/") {
-        var id =  "w" + Math.random().toString(36).substr(2, 15);
-        window.location.replace("/"+id);
+        var id = "w" + Math.random().toString(36).substr(2, 15);
+        window.location.replace("/" + id);
     }
     else {
         wall = path.substr(1, path.length);
@@ -116,9 +116,9 @@ $(document).ready(function () {
         $("#notes").delegate(".draggable", "mouseout", function () {
             $(this).find(".close").hide();
         });
-        
+
         //resize
-        $("#notes").delegate(".draggable","resizestop", function (event, ui) {
+        $("#notes").delegate(".draggable", "resizestop", function (event, ui) {
             updateNoteDb(noteToJson($(this)));
         });
     });
@@ -179,7 +179,7 @@ function deleteNoteDb(jsonData) {
 
 function noteToJson(note) {
     var dataJson = {
-        "pid": note.attr("pid"),
+        "pid": parseInt(note.attr("pid")),
         "left": note.css("left"),
         "top": note.css("top"),
         "width": note.css("width"),
@@ -187,8 +187,9 @@ function noteToJson(note) {
         "color": note.css("background-color"),
         "title": note.find(".title").text(),
         "content": note.find(".content").html(),
-        "date":  note.find(".date").attr("data-unix")
+        "date": note.find(".date").attr("data-unix")
     };
+    console.log(dataJson);
     return dataJson;
 }
 
@@ -217,14 +218,14 @@ function createNoteFromJson(dataJson) {
     //add note
     $("#notes").append(note);
     $("#notes").find(".close").hide();
-    
+
     //compute color contrast
     note.contrastColor();
-    
+
     //attach events
-    note.draggable({handle: ".move-note", opacity:0.8});
+    note.draggable({handle: ".move-note", opacity: 0.8});
     note.resizable();
-    
+
     return note;
 }
 
@@ -262,11 +263,11 @@ function modalToJson() {
 }
 
 function resetModal() {
-        //currentPid = undefined;
-        $("#newNote")[0].reset();
-        $("#newModal").css("left", 0);
-        $("#newModal").css("top", 0);
-        $("#content").code("");
+    //currentPid = undefined;
+    $("#newNote")[0].reset();
+    $("#newModal").css("left", 0);
+    $("#newModal").css("top", 0);
+    $("#content").code("");
 }
 
 //from http://wowmotty.blogspot.fr/2009/06/convert-jquery-rgb-output-to-hex-color.html
@@ -279,22 +280,22 @@ function rgb2hex(rgb) {
 }
 
 //from http://codeitdown.com/jquery-color-contrast/
-$.fn.contrastColor = function() {
-    return this.each(function() {
+$.fn.contrastColor = function () {
+    return this.each(function () {
         var bg = $(this).css('background-color');
         //use first opaque parent bg if element is transparent
-        if(bg == 'transparent' || bg == 'rgba(0, 0, 0, 0)') { 
-            $(this).parents().each(function(){
+        if (bg == 'transparent' || bg == 'rgba(0, 0, 0, 0)') {
+            $(this).parents().each(function () {
                 bg = $(this).css('background-color')
-                if(bg != 'transparent' && bg != 'rgba(0, 0, 0, 0)') return false; 
+                if (bg != 'transparent' && bg != 'rgba(0, 0, 0, 0)') return false;
             });
             //exit if all parents are transparent
-            if(bg == 'transparent' || bg == 'rgba(0, 0, 0, 0)') return false;
+            if (bg == 'transparent' || bg == 'rgba(0, 0, 0, 0)') return false;
         }
         //get r,g,b and decide
-        var rgb = bg.replace(/^(rgb|rgba)\(/,'').replace(/\)$/,'').replace(/\s/g,'').split(',');
-        var yiq = ((rgb[0]*299)+(rgb[1]*587)+(rgb[2]*114))/1000;
-        if(yiq >= 128) {
+        var rgb = bg.replace(/^(rgb|rgba)\(/, '').replace(/\)$/, '').replace(/\s/g, '').split(',');
+        var yiq = ((rgb[0] * 299) + (rgb[1] * 587) + (rgb[2] * 114)) / 1000;
+        if (yiq >= 128) {
             $(this).find(".title").removeClass('light-color ');
             $(this).find(".content").removeClass('light-color');
             $(this).find(".date").removeClass('light-color');
