@@ -189,7 +189,6 @@ function noteToJson(note) {
         "content": note.find(".content").html(),
         "date": note.find(".date").attr("data-unix")
     };
-    console.log(dataJson);
     return dataJson;
 }
 
