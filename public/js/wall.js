@@ -37,6 +37,7 @@ $(document).ready(function () {
             noteCount++;
             var jsonData = modalToJson();
             jsonData.pid = noteCount;
+            jsonData.zindex = getNextZindex();
             jsonData.date = new Date().getTime() / 1000;
             var note = createNoteFromJson(jsonData);
             saveNoteDb(noteToJson(note));
@@ -50,6 +51,7 @@ $(document).ready(function () {
             dataJson.pid = old.pid;
             dataJson.left = old.left;
             dataJson.top = old.top;
+            dataJson.zindex = getNextZindex();
             dataJson.date = new Date().getTime() / 1000;
 
             updateNoteFromJson(dataJson);
@@ -187,8 +189,10 @@ function noteToJson(note) {
         "color": note.css("background-color"),
         "title": note.find(".title").text(),
         "content": note.find(".content").html(),
-        "date": note.find(".date").attr("data-unix")
+        "date": note.find(".date").attr("data-unix"),
+        "zindex": parseInt(note.css("z-index"))
     };
+
     return dataJson;
 }
 
@@ -205,6 +209,7 @@ function createNoteFromJson(dataJson) {
         .css("top", dataJson.top)
         .css("width", dataJson.width)
         .css("height", dataJson.height)
+        .css("z-index", dataJson.zindex)
         .append('<p class="title"></p>')
         .append('<p class="content"></p>')
         .append('<p class="date" data-unix="' + dataJson.date + '">' + moment.unix(dataJson.date).format('MMMM Do YYYY, h:mm:ss a') + '</p>');
@@ -222,7 +227,7 @@ function createNoteFromJson(dataJson) {
     note.contrastColor();
 
     //attach events
-    note.draggable({handle: ".move-note", opacity: 0.8});
+    note.draggable({handle: ".move-note", opacity: 0.8 }); //stack: ".draggable"
     note.resizable();
 
     return note;
@@ -236,6 +241,7 @@ function updateNoteFromJson(dataJson) {
     note.css("left", dataJson.left)
     note.css("width", dataJson.width)
     note.css("height", dataJson.height)
+    note.css("z-index", dataJson.zindex)
     note.css("background-color", dataJson.color)
     note.find(".title").text(dataJson.title)
     $("#content").code(dataJson.content); //remove javascript
@@ -256,7 +262,7 @@ function modalToJson() {
     var dataJson = {
         "color": $("#color").val(),
         "title": $("#title").val(),
-        "content": $("#content").code(),
+        "content": $("#content").code()
     };
     return dataJson;
 }
@@ -267,6 +273,17 @@ function resetModal() {
     $("#newModal").css("left", 0);
     $("#newModal").css("top", 0);
     $("#content").code("");
+}
+
+function getNextZindex() {
+    var max = 0;
+    $(".draggable").each(function(){
+        var zindex = parseInt($(this).css("z-index"));
+        if(zindex > max)
+        max = zindex;
+    });
+
+    return max + 1;
 }
 
 //from http://wowmotty.blogspot.fr/2009/06/convert-jquery-rgb-output-to-hex-color.html
