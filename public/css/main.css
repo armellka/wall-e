@@ -1,5 +1,5 @@
 body {
-    padding-top: 60px;
+    padding-top: 70px;
     background-image: url("data:image/gif;base64,R0lGODlhBgAGAIAAAPr6%2Bv%2F%2F%2FyH5BAAAAAAALAAAAAAGAAYAAAIKTGCJBu2cYFyhAAA7");
     color: #A0A0A0;
     font-size: 16px;
@@ -18,10 +18,11 @@ body {
     text-shadow: 0 1px 0 #000;
 }
 
-.date {
+.footer {
     font-size: 70%;
     text-align:right;
 }
+
 
 .close {
     opacity: 0.5;

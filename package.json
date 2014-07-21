@@ -9,7 +9,12 @@
         "socket.io": "~1.0.4",
         "swig": "~1.3.2",
         "mongodb": "",
-        "monk": ""
+        "monk": "",
+        "express-session":"",
+        "cookie-parser":"",
+        "cookie":"",
+        "passport":"",
+        "passport-twitter":""
     },
     "engines": {
         "node": "0.10.28"

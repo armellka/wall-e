@@ -16,7 +16,7 @@ $(document).ready(function () {
         e.preventDefault();
         resetModal();
         currentPid = undefined;
-        $("#newModal").modal();
+        $("#newModal").modal({backdrop: 'static'});
     });
 
     $("#content").summernote({
@@ -29,6 +29,11 @@ $(document).ready(function () {
         ]
     });
 
+    if($("#userName").text() == "") {
+        $("#btnAdd").attr("disabled", "disabled");
+    };
+
+
     $("#newNote").bind("submit", function (e) {
         e.preventDefault();
 
@@ -39,6 +44,7 @@ $(document).ready(function () {
             jsonData.pid = noteCount;
             jsonData.zindex = getNextZindex();
             jsonData.date = new Date().getTime() / 1000;
+            jsonData.author = $("#userName").text();
             var note = createNoteFromJson(jsonData);
             saveNoteDb(noteToJson(note));
         }
@@ -59,21 +65,48 @@ $(document).ready(function () {
         }
 
         $("#newModal").modal('hide');
-
     });
 
+    //update on drag stop
+    $("#notes").delegate(".draggable", "dragstop", function (event, ui) {
+        updateNoteDb(noteToJson($(this)));
+    });
+
+    //remove on button click
+    $("#notes").delegate(".remove-note", "click", function () {
+        deleteNoteDb(noteToJson($(this).parent()));
+        $(this).parent().remove();
+    });
+
+    //edit on double click
+    $("#notes").delegate(".draggable", "dblclick", function () {
+        currentPid = $(this).attr("pid");
+        jsonToModal(noteToJson($(this)));
+    });
+
+    //edit on button click
+    $("#notes").delegate(".edit-note", "click", function () {
+        currentPid = $(this).attr("pid");
+        jsonToModal(noteToJson($(this).parent()));
+    });
+
+    //show buttons on mouseover/mouseout
+    $("#notes").delegate(".draggable", "mouseover", function () {
+        $(this).find(".close").show();
+    });
+
+    $("#notes").delegate(".draggable", "mouseout", function () {
+        $(this).find(".close").hide();
+    });
+
+    //resize
+    $("#notes").delegate(".draggable", "resizestop", function (event, ui) {
+        updateNoteDb(noteToJson($(this)));
+    });
 
     //wall id
     var path = window.location.pathname;
-
-    if (path == "/") {
-        var id = "w" + Math.random().toString(36).substr(2, 15);
-        window.location.replace("/" + id);
-    }
-    else {
-        wall = path.substr(1, path.length);
-    }
-
+    wall = path.substr(1, path.length);
 
     //socketio
     socket = io.connect();
@@ -82,47 +115,12 @@ $(document).ready(function () {
     socket.emit("loadNotes", {"wall": wall});
 
     socket.on('loadNotes', function (notes) {
+
         for (var note in notes) {
             createNoteFromJson(notes[note]);
             noteCount = notes[note].pid;
         }
 
-        //update on drag stop
-        $("#notes").delegate(".draggable", "dragstop", function (event, ui) {
-            updateNoteDb(noteToJson($(this)));
-        });
-
-        //remove on button click
-        $("#notes").delegate(".remove-note", "click", function () {
-            deleteNoteDb(noteToJson($(this).parent()));
-            $(this).parent().remove();
-        });
-
-        //edit on double click
-        $("#notes").delegate(".draggable", "dblclick", function () {
-            currentPid = $(this).attr("pid");
-            jsonToModal(noteToJson($(this)));
-        });
-
-        //edit on button click
-        $("#notes").delegate(".edit-note", "click", function () {
-            currentPid = $(this).attr("pid");
-            jsonToModal(noteToJson($(this).parent()));
-        });
-
-        //show buttons on mouseover/mouseout
-        $("#notes").delegate(".draggable", "mouseover", function () {
-            $(this).find(".close").show();
-        });
-
-        $("#notes").delegate(".draggable", "mouseout", function () {
-            $(this).find(".close").hide();
-        });
-
-        //resize
-        $("#notes").delegate(".draggable", "resizestop", function (event, ui) {
-            updateNoteDb(noteToJson($(this)));
-        });
     });
 
     socket.on('saveNote', function (data) {
@@ -144,8 +142,17 @@ $(document).ready(function () {
     });
 
     socket.on('clientsCount', function (data) {
-        console.log("on clientsCount " + JSON.stringify(data));
-        $("#users").text(data);
+        $("#users").text(data.length);
+        $("#users").attr("data-original-title","");
+        var clients = "";
+        for(client in data) {
+            if(clients == "")
+                clients +=  data[client];
+            else
+                clients += " - " + data[client];
+        }
+        $("#users").attr("data-original-title", clients);
+        $("#users").tooltip();
     });
 });
 
@@ -190,7 +197,8 @@ function noteToJson(note) {
         "title": note.find(".title").text(),
         "content": note.find(".content").html(),
         "date": note.find(".date").attr("data-unix"),
-        "zindex": parseInt(note.css("z-index"))
+        "zindex": parseInt(note.css("z-index")),
+        "author": note.find(".author").text()
     };
 
     return dataJson;
@@ -212,12 +220,13 @@ function createNoteFromJson(dataJson) {
         .css("z-index", dataJson.zindex)
         .append('<p class="title"></p>')
         .append('<p class="content"></p>')
-        .append('<p class="date" data-unix="' + dataJson.date + '">' + moment.unix(dataJson.date).format('MMMM Do YYYY, h:mm:ss a') + '</p>');
+        .append('<p class="footer"><span class="author"></span> - <span class="date" data-unix="' + dataJson.date + '">' + moment.unix(dataJson.date).format('MMMM Do YYYY, h:mm:ss a') + '</span></p>');
 
     //set data
     note.find(".title").text(dataJson.title);
     $("#content").code(dataJson.content); //remove javascript
     note.find(".content").html($("#content").code());
+    note.find(".author").text(dataJson.author);
 
     //add note
     $("#notes").append(note);
@@ -229,6 +238,14 @@ function createNoteFromJson(dataJson) {
     //attach events
     note.draggable({handle: ".move-note", opacity: 0.8 }); //stack: ".draggable"
     note.resizable();
+
+    if($("#userName").text() == "") {
+        note.draggable('disable');
+        note.resizable('disable');
+        note.unbind();
+        $("#notes").unbind();
+    };
+
 
     return note;
 }
@@ -248,6 +265,7 @@ function updateNoteFromJson(dataJson) {
     note.find(".content").html($("#content").code());
     note.find(".date").attr("data-unix", dataJson.date);
     note.find(".date").text(moment.unix(dataJson.date).format('MMMM Do YYYY, h:mm:ss a'));
+    note.find(".author").text(dataJson.author);
     $('.draggable').contrastColor();
 }
 
@@ -255,7 +273,7 @@ function jsonToModal(dataJson) {
     $("#title").val(dataJson.title);
     $("#content").code(dataJson.content);
     $("#color").val(rgb2hex(dataJson.color));
-    $("#newModal").modal();
+    $("#newModal").modal({backdrop: 'static'});
 }
 
 function modalToJson() {
@@ -276,14 +294,15 @@ function resetModal() {
 }
 
 function getNextZindex() {
-    var max = 0;
-    $(".draggable").each(function(){
+    var zindexMax = 0;
+    $(".draggable").each(function () {
         var zindex = parseInt($(this).css("z-index"));
-        if(zindex > max)
-        max = zindex;
+        if (zindex > zindexMax) {
+            zindexMax = zindex;
+        }
     });
 
-    return max + 1;
+    return zindexMax + 1;
 }
 
 //from http://wowmotty.blogspot.fr/2009/06/convert-jquery-rgb-output-to-hex-color.html
