@@ -20,10 +20,10 @@ var session = require('express-session');
 
 var APP_PORT = 8081;
 
-var consumerKey = "<consumerKey>";
-var consumerSecret = "<consumerSecret>";
-var callBackUrl = "http://<url>/auth/login/callback";
-var sessionSecret = "<sessionSecret>";
+var consumerKey = "***";
+var consumerSecret = "***";
+var callBackUrl = "http://***/auth/login/callback";
+var sessionSecret = "***";
 
 //main
 var app = express();
@@ -222,12 +222,27 @@ io.sockets.on('connection', function (socket) {
         }
     });
 
+    //move
+    socket.on('moveNote', function (data) {
+        if (socket.author) {
+            console.log("moveNote: " + JSON.stringify(data));
+            var collection = db.get(socket.room);
+            collection.update({"pid": data.pid}, {$set: {
+                "top": data.top,
+                "left": data.left,
+                "width": data.width,
+                "height": data.height,
+            }});
+            socket.broadcast.to(socket.room).emit('moveNote', data);
+        }
+    });
+
     //delete
     socket.on('deleteNote', function (data) {
         if (socket.author) {
             console.log("deleteNote: " + JSON.stringify(data));
             var collection = db.get(socket.room);
-            collection.remove({"pid": data.pid});
+            collection.remove({"pid": data});
             socket.broadcast.to(socket.room).emit('deleteNote', data);
         }
     });

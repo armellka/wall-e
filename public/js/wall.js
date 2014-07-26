@@ -69,7 +69,7 @@ $(document).ready(function () {
 
     //update on drag stop
     $("#notes").delegate(".draggable", "dragstop", function (event, ui) {
-        updateNoteDb(noteToJson($(this)));
+        moveNoteDb(noteToJson($(this)));
     });
 
     //remove on button click
@@ -101,7 +101,7 @@ $(document).ready(function () {
 
     //resize
     $("#notes").delegate(".draggable", "resizestop", function (event, ui) {
-        updateNoteDb(noteToJson($(this)));
+        moveNoteDb(noteToJson($(this)));
     });
 
     //wall id
@@ -136,9 +136,14 @@ $(document).ready(function () {
         updateNoteFromJson(data);
     });
 
+    socket.on('moveNote', function (data) {
+        console.log("on moveNote " + JSON.stringify(data));
+        moveNoteFromJson(data);
+    });
+
     socket.on('deleteNote', function (data) {
         console.log("on deleteNote " + JSON.stringify(data));
-        $(".draggable[pid=" + data.pid + "]").remove();
+        $(".draggable[pid=" + data + "]").remove();
     });
 
     socket.on('clientsCount', function (data) {
@@ -175,14 +180,27 @@ function updateNoteDb(jsonData) {
     socket.emit("updateNote", jsonData);
 }
 
+
+function moveNoteDb(jsonData) {
+    var data = {
+	"pid": jsonData.pid,
+	"top": jsonData.top,
+	"left": jsonData.left,
+	"width": jsonData.width,
+	"height": jsonData.height
+    };
+    console.log("emit moveNote " + JSON.stringify(data));
+    socket.emit("moveNote", data);
+}
+
 function saveNoteDb(jsonData) {
     console.log("emit saveNote " + JSON.stringify(jsonData));
     socket.emit("saveNote", jsonData);
 }
 
 function deleteNoteDb(jsonData) {
-    console.log("emit deleteNote " + JSON.stringify(jsonData));
-    socket.emit("deleteNote", jsonData);
+    console.log("emit deleteNote " + JSON.stringify(jsonData.pid));
+    socket.emit("deleteNote", jsonData.pid);
 }
 
 
@@ -268,6 +286,16 @@ function updateNoteFromJson(dataJson) {
     note.find(".author").text(dataJson.author);
     $('.draggable').contrastColor();
 }
+
+function moveNoteFromJson(dataJson) {
+    var note = $(".draggable[pid=" + dataJson.pid + "]");
+
+    note.css("top", dataJson.top)
+    note.css("left", dataJson.left)
+    note.css("width", dataJson.width)
+    note.css("height", dataJson.height)
+}
+
 
 function jsonToModal(dataJson) {
     $("#title").val(dataJson.title);
