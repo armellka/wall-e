@@ -1,0 +1,30 @@
+<div class="draggable" pid="[[note.pid]]"
+     style="background-color: [[note.color]];
+		width: [[note.width]];
+		height: [[note.height]];
+		top: [[note.top]];
+		left: [[note.left]];
+		z-index: [[note.zindex]]">
+
+        <!-- <a href="#" ng-click="$parent.removeNote(note.pid)">delete</a> -->
+
+		<span class="close remove-note">
+			<span class="glyphicon glyphicon-remove"></span>
+		</span>
+
+		<span class="close edit-note">
+			<span class="glyphicon glyphicon-pencil"></span>
+		</span>
+
+		<span class="close move-note">
+			<span class="glyphicon glyphicon-move"></span>
+		</span>
+
+    <p class="title">[[note.title]]</p>
+
+    <p class="content">[[note.content]]</p>
+
+    <p class="footer">
+        <span class="author">[[note.author]]</span> - <span class="author">[[note.date]]</span>
+    </p>
+</div>

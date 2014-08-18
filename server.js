@@ -208,7 +208,8 @@ io.sockets.on('connection', function (socket) {
             console.log("saveNote:" + JSON.stringify(data));
             var collection = db.get(socket.room);
             collection.insert(data);
-            socket.broadcast.to(socket.room).emit('saveNote', data);
+            //socket.broadcast.to(socket.room).emit('saveNote', data);
+            io.sockets.in(socket.room).emit('saveNote', data);
         }
     });
 
@@ -218,7 +219,8 @@ io.sockets.on('connection', function (socket) {
             console.log("updateNote: " + JSON.stringify(data));
             var collection = db.get(socket.room);
             collection.update({"pid": data.pid}, {$set: data});
-            socket.broadcast.to(socket.room).emit('updateNote', data);
+            //socket.broadcast.to(socket.room).emit('updateNote', data);
+            io.sockets.in(socket.room).emit('updateNote', data);
         }
     });
 
@@ -231,9 +233,10 @@ io.sockets.on('connection', function (socket) {
                 "top": data.top,
                 "left": data.left,
                 "width": data.width,
-                "height": data.height,
+                "height": data.height
             }});
-            socket.broadcast.to(socket.room).emit('moveNote', data);
+            //socket.broadcast.to(socket.room).emit('moveNote', data);
+            io.sockets.in(socket.room).emit('moveNote', data);
         }
     });
 
@@ -243,7 +246,8 @@ io.sockets.on('connection', function (socket) {
             console.log("deleteNote: " + JSON.stringify(data));
             var collection = db.get(socket.room);
             collection.remove({"pid": data});
-            socket.broadcast.to(socket.room).emit('deleteNote', data);
+            //socket.broadcast.to(socket.room).emit('deleteNote', data);
+            io.sockets.in(socket.room).emit('deleteNote', data);
         }
     });
 
@@ -270,6 +274,4 @@ io.sockets.on('connection', function (socket) {
 
         io.sockets.in(socket.room).emit('clientsCount', clientsCount);
     }
-
 });
-

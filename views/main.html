@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html ng-app="walleApp" lang="en">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -21,6 +21,8 @@
     <script type="text/javascript" src="public/js/moment.min.js"></script>
     <script type="text/javascript" src="public/js/summernote.min.js"></script>
     <script type="text/javascript" src="public/js/jquery.ui.touch-punch.min.js"></script>
+    <script type="text/javascript" src="public/js/angular.min.js"></script>
+    <script type="text/javascript" src="public/js/note.js"></script>
     <script type="text/javascript" src="public/js/wall.js"></script>
 
 </head>
@@ -41,10 +43,10 @@
         <div class="collapse navbar-collapse">
 
             <ul class="nav navbar-nav">
-            <li>
-                <a href="/">New wall</a>
-            </li>
-                </ul>
+                <li>
+                    <a href="/">New wall</a>
+                </li>
+            </ul>
 
             <ul class="nav navbar-nav navbar-right">
 
@@ -54,7 +56,7 @@
 
                 {% if !user.username %}
                 <li>
-                   <a href="/auth/login">LogIn</a>
+                    <a href="/auth/login">LogIn</a>
                 </li>
                 {% endif %}
 
@@ -80,13 +82,17 @@
     </div>
 </div>
 
-<div class="container">
+
+
+<div class="container" id="notes" ng-controller="NotesController">
 
     <a href="#">
         <button id="btnAdd" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> Note</button>
     </a>
 
-    <div id="notes"></div>
+    <div ng-repeat="note in notes">
+        <ng-note note="note"></ng-note>
+    </div>
 
     <!-- Modal -->
     <div class="modal" id="newModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -98,10 +104,10 @@
                     <h4 class="modal-title" id="myModalLabel">Note</h4>
                 </div>
                 <form id="newNote">
-                    <div class="modal-body">
-                        Title: <input type="text" id="title" class="form-control"><br/>
-                        Content: <textarea id="content" class="form-control"></textarea><br/>
-                        Color: <input id="color" name="color" type="color" value="#E6E6E6">
+                    <div class="modal-body" ng-init="newNote = {color:'#e6e6e6'}">
+                        Title: <input type="text" id="title" class="form-control" ng-model="newNote.title"/><br/>
+                        Content: <textarea id="content" class="form-control" ng-model="newNote.content"></textarea><br/>
+                        Color: <input id="color" name="color" type="color" ng-model="newNote.color" value="[[newNote.color]]"/>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
